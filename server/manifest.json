@@ -1,0 +1,117 @@
+{
+  "name": "cocos-slot-mcp",
+  "version": "0.1.0",
+  "protocol": "mcp",
+  "protocolVersion": "2024-11-05",
+  "transport": "stdio (default) or loopback HTTP",
+  "framing": "newline-delimited JSON-RPC over stdio or one JSON-RPC object per HTTP POST",
+  "tier": "mixed (read-only tools plus one opt-in write tool)",
+  "editorRequired": false,
+  "runtime": {
+    "node": ">=20",
+    "moduleType": "module",
+    "dependencies": []
+  },
+  "entryPoint": "src/index.js",
+  "rootResolution": ["--root <absolute path>", "CLAUDE_PROJECT_DIR", "process.cwd()"],
+  "tools": [
+    {
+      "name": "editor_status",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": true,
+      "description": "Check the live Editor bridge and project identity without accessing or modifying scenes."
+    },
+    {
+      "name": "project_map",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Discover likely Cocos Creator project roots, creator version, actual npm scripts, and bounded game-like subdirectories."
+    },
+    {
+      "name": "resolve_game",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Resolve a 4-digit game id to all matching directories under the project root; never guesses on ambiguous matches."
+    },
+    {
+      "name": "scene_inspect",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Parse a .scene/.prefab JSON file and return bounded node/component counts, node names/paths, and parse errors."
+    },
+    {
+      "name": "asset_refs_check",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Inspect __uuid__ asset references in a scene/prefab and report refs unresolved against the .meta asset index."
+    },
+    {
+      "name": "es5_scan",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Scan source files for constructs banned by the repo cross-profile ES5-safety rule."
+    },
+    {
+      "name": "module_triple_check",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Inspect a Module/Data/Config file group for naming pattern and onDestroy cleanup evidence."
+    },
+    {
+      "name": "scene_query_node_tree",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": true,
+      "description": "Read the live scene node hierarchy (uuid, name, path, parent/child links) through the companion Editor extension. Requires Editor; no scene mutation or save."
+    },
+    {
+      "name": "scene_query_node_components",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Read bounded serialized component summaries from a saved scene/prefab. Requires scenePath and exactly one nodePath or nodeUuid; optional projectPath and maxComponents (default 50, clamped 1..200). No live Editor access."
+    },
+    {
+      "name": "scene_query_components_catalog",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Read a bounded saved scene/prefab component-reference catalog in deterministic type/node/component order. Requires scenePath; optional projectPath, case-insensitive substring typeFilter, and maxResults (default 200, clamped 1..1000). No live Editor access."
+    },
+    {
+      "name": "scene_batch_node_properties",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": false,
+      "description": "Read bounded safe properties from a saved scene/prefab for ordered node selectors with individual errors. Requires scenePath and nodes (each exactly one nodePath or nodeUuid); optional projectPath, properties (first 50), and maxNodes (default 100, clamped 1..500). No live Editor access."
+    },
+    {
+      "name": "module_triple_wiring_check_live",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": true,
+      "description": "Audit live Module components that provably call getComponent() on a naming-convention-compatible Config identifier in their own source; naming alone is never evidence. Modules without that call are skipped (skipped[], reason no_config_dependency_in_source) \u2014 known limitation: a Module depending on a differently-named/shared Config is also skipped, not flagged. Among audited modules: missing Config is error; missing Data is warn. Healthy modules are counted; unresolved CIDs are not guessed. No per-game whitelist. Never modifies or saves scenes."
+    },
+    {
+      "name": "scene_missing_refs_live",
+      "tier": "read-only",
+      "writes": false,
+      "editorRequired": true,
+      "description": "Inspect bounded live component properties for missing asset UUID references through the Editor asset database. Deduplicates lookups, excludes __id__ links, and reports truncation; unavailable names and expected types remain null. Never modifies or saves scenes."
+    },
+    {
+      "name": "scene_create_node",
+      "tier": "write",
+      "writes": true,
+      "editorRequired": true,
+      "description": "Create ONE empty node live in the open Editor scene hierarchy via the companion extension's create-node IPC. Disabled by default: the project owner must create a .mcp-control/mcp-write-enabled sentinel file in the Cocos project to allow it. Never saves the scene; every call requires confirm:true and the change is undoable with Ctrl+Z in the Editor."
+    }
+  ]
+}
